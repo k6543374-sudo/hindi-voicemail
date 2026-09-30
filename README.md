@@ -1,3 +1,9 @@
+# Hindi Voicemail v0.2.0-alpha
+
+Colourful dark-blue/teal interface with English controls. The bundled greeting and offline speech recognition remain Hindi. This is an experimental microphone demo and audio transcription app, not live SIM call conversation. Not tested on Redmi Note 10.
+
+The APK is debug-signed. Android may require uninstalling the old build before installing this one if signing keys differ. Uninstalling removes the local inbox; share any important transcripts first.
+
 # Hindi Voicemail (experimental v0.1)
 
 A free, offline Hindi voice-message inbox for Android 10+. Designed for an arm64 Android 12 phone. **Not a SIM-call AI answering machine.**
