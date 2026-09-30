@@ -1,0 +1,49 @@
+name: Verify v0.2 Android screens
+on:
+  push:
+    paths: [".github/workflows/screens.yml"]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  screenshots:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Download published APK and enable KVM
+        run: |
+          curl -fL https://github.com/k6543374-sudo/hindi-voicemail/releases/download/v0.2.0-alpha/hindi-voicemail-0.2.0-debug.apk -o app.apk
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          arch: x86_64
+          target: default
+          ram-size: 2048M
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: |
+            adb install app.apk
+            adb shell am start -n org.voicemail.hindi/.MainActivity
+            sleep 20
+            adb shell pidof org.voicemail.hindi
+            adb shell screencap -p /sdcard/ui-top.png
+            adb pull /sdcard/ui-top.png ui-top.png
+            adb shell input swipe 160 560 160 180 700
+            sleep 2
+            adb shell screencap -p /sdcard/ui-middle.png
+            adb pull /sdcard/ui-middle.png ui-middle.png
+            adb shell input swipe 160 560 160 100 700
+            sleep 2
+            adb shell screencap -p /sdcard/ui-bottom.png
+            adb pull /sdcard/ui-bottom.png ui-bottom.png
+      - name: Publish screenshots only
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload v0.2.0-alpha ui-top.png ui-middle.png ui-bottom.png --clobber
